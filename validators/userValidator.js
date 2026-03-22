@@ -1,4 +1,5 @@
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, check } = require("express-validator");
+const { prisma } = require("../lib/prisma");
 
 const validateSignup = [
   body("firstName")
@@ -84,4 +85,30 @@ const validateLogin = [
   },
 ];
 
-module.exports = { validateSignup, validateLogin };
+const validateProfileImage = [
+  check("profileImage").custom((value, { req }) => {
+    if (!req.file) {
+      throw new Error("File is required");
+    }
+    // Validate MIME type
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      throw new Error("Invalid file type. Only JPEG, PNG and GIF are allowed.");
+    }
+    // Validate file size (e.g., max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+    if (req.file.size > maxSize) {
+      throw new Error("File is too large (max 2MB)");
+    }
+    return true;
+  }),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
+module.exports = { validateSignup, validateLogin, validateProfileImage };

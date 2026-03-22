@@ -13,11 +13,18 @@ datasource db {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  firstName String @map("first_name")
-  lastName  String @map("last_name")
-  email     String @unique
-  password  String
+  id           Int     @id @default(autoincrement())
+  firstName    String  @map("first_name")
+  lastName     String  @map("last_name")
+  email        String  @unique
+  password     String
+  role         Role    @default(USER)
+  profileImage String? @map("profile_image")
 
   @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
 }

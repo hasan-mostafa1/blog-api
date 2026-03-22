@@ -1,17 +1,19 @@
 const { matchedData } = require("express-validator");
-const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const { prisma } = require("../lib/prisma");
 const auth = require("../middlewares/authMiddleware");
 const userValidator = require("../validators/userValidator");
 const utils = require("../lib/utils");
+const { userResource } = require("../resources/userResource");
+const upload = require("../config/multer");
+const path = require("node:path");
 
 module.exports.signup = [
   userValidator.validateSignup,
   async (req, res) => {
     const { firstName, lastName, email, password } = matchedData(req);
     const hashedPassword = await bcrypt.hash(password, 10);
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         firstName: firstName,
         lastName: lastName,
@@ -21,9 +23,9 @@ module.exports.signup = [
     });
 
     const jwt = utils.issueJwt(user);
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      user,
+      user: userResource(user),
       token: jwt.token,
       expiresIn: jwt.expiresIn,
     });
@@ -48,7 +50,7 @@ module.exports.login = [
       const jwt = utils.issueJwt(user);
       return res.status(200).json({
         success: true,
-        user,
+        user: userResource(user),
         token: jwt.token,
         expiresIn: jwt.expiresIn,
       });
@@ -61,7 +63,23 @@ module.exports.login = [
   },
 ];
 
-module.exports.profile = [
+module.exports.showProfile = [
   auth,
-  (req, res) => res.status(200).json({ user: req.user }),
+  (req, res) => res.status(200).json({ user: userResource(req.user) }),
+];
+
+module.exports.updateProfileImage = [
+  auth,
+  upload.single("profileImage"),
+  userValidator.validateProfileImage,
+  async (req, res) => {
+    const filePath = path.join("uploads/profiles", req.file.filename);
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        profileImage: filePath,
+      },
+    });
+    res.status(200).json({ user: userResource(user) });
+  },
 ];

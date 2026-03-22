@@ -10,7 +10,7 @@ async function ensureFolder(folderPath) {
 
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const storagePath = path.join(__dirname, "../storage/uploads");
+    const storagePath = path.join(__dirname, "../public/uploads/profiles");
     await ensureFolder(storagePath);
     cb(null, storagePath);
   },
