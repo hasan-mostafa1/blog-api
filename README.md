@@ -1,2 +1,3 @@
-# backend-template
-Backend template repo with frequently reused setup code to save time.
+# blog-api
+
+Restful api for a personal blog
