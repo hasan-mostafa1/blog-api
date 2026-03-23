@@ -6,7 +6,7 @@ const path = require("node:path");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 const webRouter = require("./routes/web");
 const apiRouter = require("./routes/api");
-const passport = require("passport");
+const adminRouter = require("./routes/admin");
 
 /**
  * -------------- GENERAL SETUP ----------------
@@ -31,6 +31,7 @@ require("./config/passportJwt");
  * -------------- ROUTES ----------------
  */
 
+app.use("/api/admin", adminRouter);
 app.use("/api", apiRouter);
 app.use(webRouter);
 
