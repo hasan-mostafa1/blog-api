@@ -140,4 +140,38 @@ const postExists = [
   },
 ];
 
-module.exports = { validatePost, validateQueryString, postExists };
+const publishedPostExists = [
+  param("postId")
+    .exists()
+    .withMessage("post id is required")
+    .isInt()
+    .withMessage("post id must be an integer")
+    .toInt()
+    .custom(async (value, { req }) => {
+      const post = await prisma.post.findUnique({
+        where: { id: value, published: true },
+        include: {
+          author: true,
+        },
+      });
+      if (!post) {
+        throw new Error("Post not found!");
+      }
+      req.post = post;
+      return true;
+    }),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(404).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
+module.exports = {
+  validatePost,
+  validateQueryString,
+  postExists,
+  publishedPostExists,
+};
