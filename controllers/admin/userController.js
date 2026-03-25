@@ -5,10 +5,12 @@ const {
   userResource,
   userResourceArray,
 } = require("../../resources/userResource");
+const userValidator = require("../../validators/userValidator");
 
 module.exports.index = [
   auth,
   isAdmin,
+  userValidator.validateQueryString,
   async (req, res) => {
     // Filtering
     const { firstName, lastName, email, role } = req.query;

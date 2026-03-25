@@ -1,4 +1,4 @@
-const { body, validationResult, check } = require("express-validator");
+const { body, validationResult, check, query } = require("express-validator");
 const { prisma } = require("../lib/prisma");
 
 const validateSignup = [
@@ -111,4 +111,63 @@ const validateProfileImage = [
   },
 ];
 
-module.exports = { validateSignup, validateLogin, validateProfileImage };
+const validateQueryString = [
+  query("firstName")
+    .optional()
+    .isString()
+    .withMessage("first name must be a string"),
+  query("lastName")
+    .optional()
+    .isString()
+    .withMessage("last name must be a string"),
+  query("email")
+    .optional()
+    .isEmail()
+    .withMessage("email is not a valid email address"),
+  query("role")
+    .optional()
+    .isIn(["ADMIN", "USER"])
+    .withMessage("Role must be ADMIN OR USER"),
+  query("sort")
+    .optional()
+    .isString()
+    .withMessage("sort must be a string")
+    .custom((value) => {
+      const allowedSortFields = ["firstName", "lastName"];
+      value.split(",").forEach((item) => {
+        if (item.at(0) !== "-" && item.at(0) !== "+") {
+          throw new Error(
+            "Invalid sort order direction! use '+' and '-' signs before columns names to indicate 'asc' and 'desc' directions.",
+          );
+        }
+        if (!allowedSortFields.includes(item.slice(1))) {
+          throw new Error(
+            `Invalid sort field! Allowed fields are : ${allowedSortFields.join(",")}`,
+          );
+        }
+      });
+      return true;
+    }),
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be an integer greater than or equal to 1"),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("Limit must be an integer between 1 and 100"),
+  ,
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+module.exports = {
+  validateSignup,
+  validateLogin,
+  validateProfileImage,
+  validateQueryString,
+};
