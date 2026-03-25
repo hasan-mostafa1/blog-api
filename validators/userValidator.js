@@ -1,4 +1,10 @@
-const { body, validationResult, check, query } = require("express-validator");
+const {
+  body,
+  validationResult,
+  check,
+  query,
+  param,
+} = require("express-validator");
 const { prisma } = require("../lib/prisma");
 
 const validateSignup = [
@@ -169,9 +175,37 @@ const validateQueryString = [
     next();
   },
 ];
+
+const userExists = [
+  param("userId")
+    .exists()
+    .withMessage("user id is required")
+    .isInt()
+    .withMessage("user id must be an integer")
+    .toInt()
+    .custom(async (value, { req }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: value },
+      });
+      if (!user) {
+        throw new Error("user not found!");
+      }
+      req.selectedUser = user;
+      return true;
+    }),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(404).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
 module.exports = {
   validateSignup,
   validateLogin,
   validateProfileImage,
   validateQueryString,
+  userExists,
 };

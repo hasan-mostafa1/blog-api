@@ -90,17 +90,11 @@ module.exports.index = [
 module.exports.show = [
   auth,
   isAdmin,
+  userValidator.userExists,
   async (req, res) => {
-    const user = await prisma.user.findUnique({
-      where: { id: +req.params.userId },
-    });
-
-    if (!user) {
-      res.status(404).json({ msg: "User not found!" });
-    }
     res.status(200).json({
       success: true,
-      data: userResource(user),
+      data: userResource(req.selectedUser),
     });
   },
 ];
@@ -108,17 +102,11 @@ module.exports.show = [
 module.exports.destroy = [
   auth,
   isAdmin,
+  userValidator.userExists,
   async (req, res) => {
-    const user = await prisma.user.findUnique({
-      where: { id: +req.params.userId },
-    });
-    if (!user) {
-      res.status(404).json({ msg: "User not found!" });
-    }
-
-    const profileImagePath = user.profileImage;
+    const profileImagePath = req.selectedUser.profileImage;
     await prisma.user.delete({
-      where: { id: +req.params.userId },
+      where: { id: req.selectedUser.id },
     });
     if (profileImagePath) {
       await fs.unlink(profileImagePath);
