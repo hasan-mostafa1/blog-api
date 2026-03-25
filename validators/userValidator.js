@@ -102,9 +102,13 @@ const validateProfileImage = [
     }
     return true;
   }),
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      // Delete uploaded file if validation fails
+      if (req.file) {
+        await fs.unlink(req.file.path);
+      }
       return res.status(400).json({ errors: errors.array() });
     }
     next();

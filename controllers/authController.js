@@ -6,7 +6,7 @@ const userValidator = require("../validators/userValidator");
 const utils = require("../lib/utils");
 const { userResource } = require("../resources/userResource");
 const upload = require("../config/multer");
-const path = require("node:path");
+const fs = require("node:fs/promises");
 
 module.exports.signup = [
   userValidator.validateSignup,
@@ -73,13 +73,17 @@ module.exports.updateProfileImage = [
   upload.single("profileImage"),
   userValidator.validateProfileImage,
   async (req, res) => {
-    const filePath = path.join("uploads/profiles", req.file.filename);
+    const oldFilePath = req.user.profileImage;
     const user = await prisma.user.update({
       where: { id: req.user.id },
       data: {
-        profileImage: filePath,
+        profileImage: req.file.path,
       },
     });
+    // Delete uploaded file if validation fails
+    if (oldFilePath) {
+      await fs.unlink(oldFilePath);
+    }
     res.status(200).json({ user: userResource(user) });
   },
 ];

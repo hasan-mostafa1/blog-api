@@ -6,6 +6,7 @@ const {
   userResourceArray,
 } = require("../../resources/userResource");
 const userValidator = require("../../validators/userValidator");
+const fs = require("node:fs/promises");
 
 module.exports.index = [
   auth,
@@ -115,10 +116,13 @@ module.exports.destroy = [
       res.status(404).json({ msg: "User not found!" });
     }
 
+    const profileImagePath = user.profileImage;
     await prisma.user.delete({
       where: { id: +req.params.userId },
     });
-
+    if (profileImagePath) {
+      await fs.unlink(profileImagePath);
+    }
     res.sendStatus(204);
   },
 ];
