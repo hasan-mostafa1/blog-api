@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const authController = require("../controllers/authController");
 const postController = require("../controllers/postController");
+const commentController = require("../controllers/commentController");
 
 const router = Router();
 
@@ -15,5 +16,27 @@ router.get("/posts", postController.index);
 router.get("/posts/:postId", postController.show);
 router.patch("/posts/:postId/like", postController.increaseLikes);
 router.patch("/posts/:postId/unLike", postController.decreaseLikes);
+
+// Comments
+router.get("/posts/:postId/comments", commentController.index);
+router.post("/posts/:postId/comments", commentController.store);
+router.put("/posts/:postId/comments/:commentId", commentController.update);
+router.delete("/posts/:postId/comments/:commentId", commentController.destroy);
+router.get(
+  "/posts/:postId/comments/:commentId/replies",
+  commentController.getReplies,
+);
+router.post(
+  "/posts/:postId/comments/:commentId/replies",
+  commentController.addReply,
+);
+router.patch(
+  "/posts/:postId/comments/:commentId/like",
+  commentController.increaseLikes,
+);
+router.patch(
+  "/posts/:postId/comments/:commentId/unlike",
+  commentController.decreaseLikes,
+);
 
 module.exports = router;

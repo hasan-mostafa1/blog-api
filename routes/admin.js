@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const userController = require("../controllers/admin/userController");
 const postController = require("../controllers/admin/postController");
+const commentController = require("../controllers/admin/commentController");
 const router = Router();
 
 // Users
@@ -14,5 +15,10 @@ router.post("/posts", postController.store);
 router.get("/posts/:postId", postController.show);
 router.put("/posts/:postId", postController.update);
 router.delete("/posts/:postId", postController.destroy);
+
+// Comments
+router.get("/posts/:postId/comments", commentController.index);
+router.put("/posts/:postId/comments/:commentId", commentController.update);
+router.delete("/posts/:postId/comments/:commentId", commentController.destroy);
 
 module.exports = router;

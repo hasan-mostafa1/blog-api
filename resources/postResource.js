@@ -13,7 +13,7 @@ const postResource = (data) => {
     published: data.published,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-    author: data.author ? userResource(data.author) : {},
+    author: data.author ? userResource(data.author) : null,
   };
   return post;
 };
@@ -29,7 +29,7 @@ const postResourceArray = (data) => {
       published: post.published,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      author: post.author ? userResource(post.author) : {},
+      author: post.author ? userResource(post.author) : null,
     };
   });
   return posts;

@@ -13,14 +13,15 @@ datasource db {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
-  firstName    String  @map("first_name")
-  lastName     String  @map("last_name")
-  email        String  @unique
+  id           Int       @id @default(autoincrement())
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  email        String    @unique
   password     String
-  role         Role    @default(USER)
-  profileImage String? @map("profile_image")
+  role         Role      @default(USER)
+  profileImage String?   @map("profile_image")
   posts        Post[]
+  comments     Comment[]
 
   @@map("users")
 }
@@ -31,16 +32,34 @@ enum Role {
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   content     String
   bannerImage String?
-  likes       Int      @default(0)
-  published   Boolean  @default(false)
-  author      User     @relation(fields: [authorId], references: [id])
+  likes       Int       @default(0)
+  published   Boolean   @default(false)
+  author      User      @relation(fields: [authorId], references: [id])
   authorId    Int
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
 
   @@map("posts")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  likes     Int       @default(0)
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int       @map("author_id")
+  post      Post      @relation(fields: [postId], references: [id])
+  postId    Int       @map("post_id")
+  parent    Comment?  @relation("CommmentReplies", fields: [parentId], references: [id])
+  parentId  Int?      @map("parent_id")
+  replies   Comment[] @relation("CommmentReplies")
+  createdAt DateTime  @default(now()) @map("cerated_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("comments")
 }
