@@ -15,25 +15,26 @@ module.exports.index = [
   userValidator.validateQueryString,
   async (req, res) => {
     // Filtering
-    const { firstName, lastName, email, role, sort, page, limit } =
-      matchedData(req);
+    const { sq, role, sort, page, limit } = matchedData(req);
     const whereClause = {};
 
-    if (firstName) {
-      whereClause.firstName = {
-        contains: firstName,
-        mode: "insensitive",
+    if (sq) {
+      whereClause.OR = {
+        firstName: {
+          contains: sq,
+          mode: "insensitive",
+        },
+        lastName: {
+          contains: sq,
+          mode: "insensitive",
+        },
+        email: {
+          contains: sq,
+          mode: "insensitive",
+        },
       };
     }
-    if (lastName) {
-      whereClause.lastName = {
-        contains: lastName,
-        mode: "insensitive",
-      };
-    }
-    if (email) {
-      whereClause.email = email;
-    }
+
     if (role) {
       whereClause.role = role;
     }

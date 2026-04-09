@@ -66,11 +66,10 @@ const validatePost = [
 ];
 
 const validateQueryString = [
-  query("title").optional().isString().withMessage("title must be a string"),
-  query("content")
+  query("sq")
     .optional()
     .isString()
-    .withMessage("content must be a string"),
+    .withMessage("Search query must be a string"),
   query("sort")
     .optional()
     .isString()

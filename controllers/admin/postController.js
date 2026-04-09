@@ -16,19 +16,19 @@ module.exports.index = [
   postValidator.validateQueryString,
   async (req, res) => {
     // Filtering
-    const { title, content, sort, page, limit } = matchedData(req);
+    const { sq, sort, page, limit } = matchedData(req);
     const whereClause = {};
 
-    if (title) {
-      whereClause.title = {
-        contains: title,
-        mode: "insensitive",
-      };
-    }
-    if (content) {
-      whereClause.content = {
-        contains: content,
-        mode: "insensitive",
+    if (sq) {
+      whereClause.OR = {
+        title: {
+          contains: sq,
+          mode: "insensitive",
+        },
+        content: {
+          contains: sq,
+          mode: "insensitive",
+        },
       };
     }
     // Sorting

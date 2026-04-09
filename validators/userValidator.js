@@ -122,18 +122,10 @@ const validateProfileImage = [
 ];
 
 const validateQueryString = [
-  query("firstName")
+  query("sq")
     .optional()
     .isString()
-    .withMessage("first name must be a string"),
-  query("lastName")
-    .optional()
-    .isString()
-    .withMessage("last name must be a string"),
-  query("email")
-    .optional()
-    .isEmail()
-    .withMessage("email is not a valid email address"),
+    .withMessage("Search query must be a string"),
   query("role")
     .optional()
     .isIn(["ADMIN", "USER"])
