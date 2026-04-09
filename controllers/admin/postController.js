@@ -16,7 +16,7 @@ module.exports.index = [
   postValidator.validateQueryString,
   async (req, res) => {
     // Filtering
-    const { title, content } = req.query;
+    const { title, content, sort, page, limit } = matchedData(req);
     const whereClause = {};
 
     if (title) {
@@ -37,9 +37,9 @@ module.exports.index = [
         id: "asc",
       },
     ];
-    if (req.query.sort) {
+    if (sort) {
       sortList = [];
-      const sortQuery = req.query.sort;
+      const sortQuery = sort;
       sortQuery.split(",").forEach((item) => {
         let order;
         if (item.at(0) === "-") {
@@ -51,21 +51,21 @@ module.exports.index = [
           [item.slice(1)]: order,
         });
       });
-      req.query.page = 1;
+      // req.query.page = 1; // Need to think about this one (reseting page when sorting the results)
     }
     // Pagination
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-    const skip = (page - 1) * limit;
+    const currentPage = page || 1;
+    const recordsLimit = limit || 10;
+    const skip = (currentPage - 1) * recordsLimit;
     const totalItems = await prisma.post.count({ where: whereClause });
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / recordsLimit);
     // Getting the data
     const posts = await prisma.post.findMany({
       include: {
         author: true,
       },
       skip: skip,
-      take: limit,
+      take: recordsLimit,
       where: whereClause,
       orderBy: sortList,
     });
@@ -74,9 +74,9 @@ module.exports.index = [
       success: true,
       data: postResourceArray(posts),
       meta: {
-        currentPage: page,
+        currentPage: currentPage,
         totalPages: totalPages,
-        itemsPerPage: limit,
+        itemsPerPage: recordsLimit,
         totalItems: totalItems,
       },
     });
@@ -169,8 +169,9 @@ module.exports.destroy = [
     const post = req.post;
 
     const bannerImagePath = post.bannerImage;
+    const { postId } = matchedData(req);
     await prisma.post.delete({
-      where: { id: req.params.postId },
+      where: { id: postId },
     });
     if (bannerImagePath) {
       await fs.unlink(bannerImagePath);

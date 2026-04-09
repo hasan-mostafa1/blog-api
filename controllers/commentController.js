@@ -13,7 +13,7 @@ module.exports.index = [
   postValidator.publishedPostExists,
   async (req, res) => {
     // Filtering
-    const { content } = req.query;
+    const { content, sort, page, limit } = matchedData(req);
     const whereClause = { postId: req.post.id };
 
     if (content) {
@@ -28,9 +28,9 @@ module.exports.index = [
         id: "asc",
       },
     ];
-    if (req.query.sort) {
+    if (sort) {
       sortList = [];
-      const sortQuery = req.query.sort;
+      const sortQuery = sort;
       sortQuery.split(",").forEach((item) => {
         let order;
         if (item.at(0) === "-") {
@@ -42,18 +42,18 @@ module.exports.index = [
           [item.slice(1)]: order,
         });
       });
-      req.query.page = 1;
+      // req.query.page = 1;
     }
     // Pagination
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-    const skip = (page - 1) * limit;
+    const currentPage = page || 1;
+    const recordsLimit = limit || 10;
+    const skip = (currentPage - 1) * recordsLimit;
     const totalItems = await prisma.comment.count({ where: whereClause });
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / recordsLimit);
     // Getting the data
     const comments = await prisma.comment.findMany({
       skip: skip,
-      take: limit,
+      take: recordsLimit,
       where: whereClause,
       orderBy: sortList,
       include: {
@@ -66,9 +66,9 @@ module.exports.index = [
       success: true,
       data: commentResourceArray(comments),
       meta: {
-        currentPage: page,
+        currentPage: currentPage,
         totalPages: totalPages,
-        itemsPerPage: limit,
+        itemsPerPage: recordsLimit,
         totalItems: totalItems,
       },
     });
@@ -185,7 +185,7 @@ module.exports.getReplies = [
   commentValidator.commentExists,
   async (req, res) => {
     // Filtering
-    const { content } = req.query;
+    const { content, sort, page, limit } = matchedData(req);
     const whereClause = { postId: req.post.id, parentId: req.comment.id };
 
     if (content) {
@@ -200,9 +200,9 @@ module.exports.getReplies = [
         id: "asc",
       },
     ];
-    if (req.query.sort) {
+    if (sort) {
       sortList = [];
-      const sortQuery = req.query.sort;
+      const sortQuery = sort;
       sortQuery.split(",").forEach((item) => {
         let order;
         if (item.at(0) === "-") {
@@ -214,18 +214,18 @@ module.exports.getReplies = [
           [item.slice(1)]: order,
         });
       });
-      req.query.page = 1;
+      // req.query.page = 1;
     }
     // Pagination
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-    const skip = (page - 1) * limit;
+    const currentPage = page || 1;
+    const recordsLimit = limit || 10;
+    const skip = (currentPage - 1) * recordsLimit;
     const totalItems = await prisma.comment.count({ where: whereClause });
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / recordsLimit);
     // Getting the data
     const comments = await prisma.comment.findMany({
       skip: skip,
-      take: limit,
+      take: recordsLimit,
       where: whereClause,
       orderBy: sortList,
       include: {
@@ -237,9 +237,9 @@ module.exports.getReplies = [
       success: true,
       data: commentResourceArray(comments),
       meta: {
-        currentPage: page,
+        currentPage: currentPage,
         totalPages: totalPages,
-        itemsPerPage: limit,
+        itemsPerPage: recordsLimit,
         totalItems: totalItems,
       },
     });

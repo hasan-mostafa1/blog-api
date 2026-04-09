@@ -1,3 +1,4 @@
+const { matchedData } = require("express-validator");
 const { prisma } = require("../lib/prisma");
 const {
   postResource,
@@ -9,7 +10,7 @@ module.exports.index = [
   postValidator.validateQueryString,
   async (req, res) => {
     // Filtering
-    const { title, content } = req.query;
+    const { title, content, sort, page, limit } = matchedData(req);
     const whereClause = { published: true };
 
     if (title) {
@@ -30,9 +31,9 @@ module.exports.index = [
         id: "asc",
       },
     ];
-    if (req.query.sort) {
+    if (sort) {
       sortList = [];
-      const sortQuery = req.query.sort;
+      const sortQuery = sort;
       sortQuery.split(",").forEach((item) => {
         let order;
         if (item.at(0) === "-") {
@@ -47,15 +48,15 @@ module.exports.index = [
       req.query.page = 1;
     }
     // Pagination
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-    const skip = (page - 1) * limit;
+    const currentPage = page || 1;
+    const recordsLimit = limit || 10;
+    const skip = (currentPage - 1) * recordsLimit;
     const totalItems = await prisma.post.count({ where: whereClause });
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / recordsLimit);
     // Getting the data
     const posts = await prisma.post.findMany({
       skip: skip,
-      take: limit,
+      take: recordsLimit,
       where: whereClause,
       orderBy: sortList,
       include: {
@@ -67,9 +68,9 @@ module.exports.index = [
       success: true,
       data: postResourceArray(posts),
       meta: {
-        currentPage: page,
+        currentPage: currentPage,
         totalPages: totalPages,
-        itemsPerPage: limit,
+        itemsPerPage: recordsLimit,
         totalItems: totalItems,
       },
     });
