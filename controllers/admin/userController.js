@@ -19,20 +19,26 @@ module.exports.index = [
     const whereClause = {};
 
     if (sq) {
-      whereClause.OR = {
-        firstName: {
-          contains: sq,
-          mode: "insensitive",
+      whereClause.OR = [
+        {
+          firstName: {
+            contains: sq,
+            mode: "insensitive",
+          },
         },
-        lastName: {
-          contains: sq,
-          mode: "insensitive",
+        {
+          lastName: {
+            contains: sq,
+            mode: "insensitive",
+          },
         },
-        email: {
-          contains: sq,
-          mode: "insensitive",
+        {
+          email: {
+            contains: sq,
+            mode: "insensitive",
+          },
         },
-      };
+      ];
     }
 
     if (role) {

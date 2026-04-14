@@ -14,16 +14,20 @@ module.exports.index = [
     const whereClause = { published: true };
 
     if (sq) {
-      whereClause.OR = {
-        title: {
-          contains: sq,
-          mode: "insensitive",
+      whereClause.OR = [
+        {
+          title: {
+            contains: sq,
+            mode: "insensitive",
+          },
         },
-        content: {
-          contains: sq,
-          mode: "insensitive",
+        {
+          content: {
+            contains: sq,
+            mode: "insensitive",
+          },
         },
-      };
+      ];
     }
     // Sorting
     let sortList = [
