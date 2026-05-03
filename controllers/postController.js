@@ -9,6 +9,7 @@ const upload = require("../config/multer");
 const auth = require("../middlewares/authMiddleware");
 const isPostAuthor = require("../middlewares/isPostAuthorMiddleware");
 const fs = require("node:fs/promises");
+const path = require("node:path");
 
 module.exports.index = [
   postValidator.validateQueryString,
@@ -174,7 +175,7 @@ module.exports.store = [
       data: {
         title: title,
         content: content,
-        bannerImage: req.file?.path,
+        bannerImage: req.file?.filename,
         published: published,
         author: {
           connect: { id: req.user.id },
@@ -208,11 +209,11 @@ module.exports.update = [
   postValidator.validatePost,
   async (req, res) => {
     const { title, content, published } = matchedData(req);
-    let bannerImagePath = req.post.bannerImage;
+    let bannerImageName = req.post.bannerImage;
     if (req.file) {
-      bannerImagePath = req.file.path;
+      bannerImageName = req.file.filename;
     } else if (req.body.bannerImage === null || req.body.bannerImage === "") {
-      bannerImagePath = null;
+      bannerImageName = null;
     }
 
     const post = await prisma.post.update({
@@ -220,7 +221,7 @@ module.exports.update = [
       data: {
         title: title,
         content: content,
-        bannerImage: bannerImagePath,
+        bannerImage: bannerImageName,
         published: published,
       },
     });
@@ -229,7 +230,12 @@ module.exports.update = [
       req.post.bannerImage &&
       (req.file || req.body.bannerImage === null || req.body.bannerImage === "")
     ) {
-      await fs.unlink(req.post.bannerImage);
+      const bannerImagePath = path.join(
+        __dirname,
+        "../public/uploads/profiles",
+        req.user.bannerImage,
+      );
+      await fs.unlink(bannerImagePath);
     }
 
     res.status(200).json({
@@ -244,9 +250,11 @@ module.exports.destroy = [
   postValidator.postExists,
   isPostAuthor,
   async (req, res) => {
-    const post = req.post;
-
-    const bannerImagePath = post.bannerImage;
+    const bannerImagePath = path.join(
+      __dirname,
+      "../public/uploads/profiles",
+      req.post.bannerImage,
+    );
     const { postId } = matchedData(req);
     await prisma.post.delete({
       where: { id: postId },
