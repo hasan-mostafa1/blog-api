@@ -13,7 +13,11 @@ router.put("/auth/profile-image", authController.updateProfileImage);
 
 // Posts
 router.get("/posts", postController.index);
+router.get("/my-posts", postController.myPosts);
+router.post("/posts", postController.store);
 router.get("/posts/:postId", postController.show);
+router.put("/posts/:postId", postController.update);
+router.delete("/posts/:postId", postController.destroy);
 router.patch("/posts/:postId/like", postController.increaseLikes);
 router.patch("/posts/:postId/unLike", postController.decreaseLikes);
 
