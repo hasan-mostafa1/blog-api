@@ -70,6 +70,11 @@ const validateQueryString = [
     .optional()
     .isString()
     .withMessage("Search query must be a string"),
+  query("authorId")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("AuthorId must be an integer greater than 0")
+    .toInt(),
   query("sort")
     .optional()
     .isString()

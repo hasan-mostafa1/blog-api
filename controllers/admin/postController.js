@@ -16,7 +16,7 @@ module.exports.index = [
   postValidator.validateQueryString,
   async (req, res) => {
     // Filtering
-    const { sq, sort, page, limit } = matchedData(req);
+    const { sq, authorId, sort, page, limit } = matchedData(req);
     const whereClause = {};
 
     if (sq) {
@@ -35,6 +35,11 @@ module.exports.index = [
         },
       ];
     }
+
+    if (authorId) {
+      whereClause.authorId = authorId;
+    }
+
     // Sorting
     let sortList = [
       {
