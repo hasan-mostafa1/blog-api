@@ -150,6 +150,9 @@ module.exports.myPosts = [
       take: recordsLimit,
       where: whereClause,
       orderBy: sortList,
+      include: {
+        author: true,
+      },
     });
 
     res.status(200).json({
@@ -269,31 +272,44 @@ module.exports.destroy = [
 module.exports.increaseLikes = [
   postValidator.publishedPostExists,
   async (req, res) => {
-    await prisma.post.update({
+    const post = await prisma.post.update({
       where: { id: req.post.id },
       data: {
         likes: {
           increment: 1,
         },
       },
+      include: {
+        author: true,
+      },
     });
-    res.sendStatus(200);
+    res.status(200).json({
+      success: true,
+      data: postResource(post),
+    });
   },
 ];
 
 module.exports.decreaseLikes = [
   postValidator.publishedPostExists,
   async (req, res) => {
+    let post;
     if (req.post.likes > 0) {
-      await prisma.post.update({
+      post = await prisma.post.update({
         where: { id: req.post.id },
         data: {
           likes: {
             decrement: 1,
           },
         },
+        include: {
+          author: true,
+        },
       });
     }
-    res.sendStatus(200);
+    res.status(200).json({
+      success: true,
+      data: postResource(post),
+    });
   },
 ];
